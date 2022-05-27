@@ -102,7 +102,7 @@ def main():
     all_commands = [module.Command() for module in mapillary_tools_commands]
 
     subparsers = parser.add_subparsers(
-        description="please choose one of the available subcommands",
+        description="please choose one of the available subcommands (this is forked btw)",
     )
     for command in all_commands:
         cmd_parser = subparsers.add_parser(
