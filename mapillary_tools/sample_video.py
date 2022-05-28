@@ -48,6 +48,9 @@ def sample_video(
             elif os.path.isfile(video_sample_path):
                 os.remove(video_sample_path)
 
+    # my hackery -- keep track of how long the previous videos have been running for, i.e. total video time up to now
+    previously_elapsed_seconds: float = 0.0
+
     for video_path in video_list:
         video_start_time_dt: T.Optional[datetime.datetime] = None
         if video_start_time is not None:
@@ -76,13 +79,23 @@ def sample_video(
             )
             if video_start_time_dt is None:
                 video_start_time_dt = extract_video_start_time(video_path)
+                
+            # my hackery - extra log
+            LOG.info(f"Sampling video with elapsed offset {previously_elapsed_seconds} sec")
+                
             insert_video_frame_timestamp(
                 os.path.basename(video_path),
                 video_sample_path_temporary,
                 video_start_time_dt,
                 video_sample_interval,
                 video_duration_ratio,
+                # my hackery - pass the extra elapsed time to offset the timestamp by the actual video "start time" 
+                previously_elapsed_seconds
             )
+            
+            # my hackery - add the current video time to the total elapsed time
+            previously_elapsed_seconds += extract_video_duration(video_path)
+            
         except (
             exceptions.MapillaryFileNotFoundError,
             exceptions.MapillaryFFmpegNotFoundError,
@@ -154,12 +167,43 @@ def extract_video_start_time(video_path: str) -> datetime.datetime:
     return video_end_time - datetime.timedelta(seconds=duration)
 
 
+# my hackery - made a copy of extract_video_start_time and only using the duration logic
+def extract_video_duration(video_path: str) -> float:
+    streams = ffmpeg.probe_video_streams(video_path)
+    if not streams:
+        raise exceptions.MapillaryVideoError(
+            f"Failed to find video streams in {video_path}"
+        )
+
+    if 2 <= len(streams):
+        LOG.warning(
+            "Found more than one (%s) video streams -- will use the first stream",
+            len(streams),
+        )
+
+    stream = streams[0]
+
+    duration_str = stream["duration"]
+    try:
+        duration = float(duration_str)
+    except (TypeError, ValueError) as exc:
+        raise exceptions.MapillaryVideoError(
+            f"Failed to find video stream duration {duration_str} from video {video_path}"
+        ) from exc
+
+    LOG.debug("Extracted video duration: %s", duration)
+
+    return duration
+
+
 def insert_video_frame_timestamp(
     video_basename: str,
     video_sampling_path: str,
     start_time: datetime.datetime,
     sample_interval: float = 2.0,
     duration_ratio: float = 1.0,
+	# my hackery - my param for extra offset, specifically total duration so far
+    previously_elapsed_seconds : float = 0.0
 ) -> None:
     for image in utils.get_image_file_list(video_sampling_path, abs_path=True):
         idx = ffmpeg.extract_idx_from_frame_filename(
@@ -171,7 +215,13 @@ def insert_video_frame_timestamp(
             continue
 
         seconds = idx * sample_interval * duration_ratio
-        timestamp = start_time + datetime.timedelta(seconds=seconds)
+        
+        # original:
+        #timestamp = start_time + datetime.timedelta(seconds=seconds)
+        
+        # my hackery:
+        timestamp = start_time + datetime.timedelta(seconds=seconds) + datetime.timedelta(seconds=previously_elapsed_seconds)
+        
         exif_edit = ExifEdit(image)
         exif_edit.add_date_time_original(timestamp)
         exif_edit.write()
