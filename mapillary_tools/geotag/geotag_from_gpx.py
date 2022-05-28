@@ -82,10 +82,23 @@ class GeotagFromGPX(GeotagFromGeneric):
                 # the ordered gpx timestamps are [5, 6, 7, 8]
                 # then the offset will be 5 - 2 = 3
                 time_delta = track[0].time - sorted_images[0][0]
-                LOG.debug("GPX start time delta: %s", time_delta)
+
+                # my hackery - extra logs
+                LOG.debug("First GPX point time is: %s", track[0].time)
+                LOG.debug("First image time is: %s", sorted_images[0][0])
+                
+                # original:
+                #LOG.debug("GPX start time delta: %s", time_delta)
+                
+                # my hackery - readable time when "negative"
+                if time_delta.total_seconds() > 0:
+                    LOG.debug("GPX start time delta: %s", time_delta)
+                else:
+                    LOG.debug("GPX start time delta: -%s", -time_delta) # because apparently python's negative date prints weirdness like "-1 day, 21:59:27.169000" for what is actually negative "2:00:32.831000", so just making something readable  
+                
                 image_time_offset += time_delta.total_seconds()
 
-        LOG.debug("Final time offset for interpolation: %s", image_time_offset)
+        LOG.debug("Final time offset for interpolation: %s sec", image_time_offset)
 
         # same thing but different type
         sorted_points = [
