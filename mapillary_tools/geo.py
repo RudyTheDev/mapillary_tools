@@ -184,3 +184,14 @@ def interpolate_lat_lon(points: List[Point], timestamp: datetime.datetime) -> Po
     else:
         alt = None
     return Point(lat=lat, lon=lon, alt=alt, angle=angle, time=timestamp)
+
+
+# my hackery - a copy of interpolate_lat_lon but only the raw index for debug
+def interpolate_idx(points: List[Point], timestamp: datetime.datetime) -> int:
+    if not points:
+        raise ValueError("Expect non-empty points")
+    # Make sure that points are sorted:
+    # for cur, nex in pairwise(points):
+    #     assert cur.time <= nex.time, "Points not sorted"
+    idx = bisect.bisect_left([x.time for x in points], timestamp)
+    return idx

@@ -11,7 +11,7 @@ from ..exceptions import (
     MapillaryGPXEmptyError,
 )
 from ..exif_read import ExifRead
-from ..geo import interpolate_lat_lon, Point
+from ..geo import interpolate_lat_lon, Point, interpolate_idx
 
 
 LOG = logging.getLogger(__name__)
@@ -105,9 +105,16 @@ class GeotagFromGPX(GeotagFromGeneric):
             Point(lat=p.lat, lon=p.lon, alt=p.alt, time=p.time, angle=None)
             for p in track
         ]
+        
+        # my hackery - gpx timestamps
+        LOG.debug("GPX start timestamp: %s", types.datetime_to_map_capture_time(sorted_points[0].time))
+        LOG.debug("GPX end timestamp:   %s", types.datetime_to_map_capture_time(sorted_points[-1].time))
 
         for exif_time, image in sorted_images:
             exif_time = exif_time + datetime.timedelta(seconds=image_time_offset)
+
+            # my hackery - extra spammy per-image timestamp
+            #LOG.debug("Image timestamp (offset): %s", exif_time)
 
             if exif_time < sorted_points[0].time:
                 delta = sorted_points[0].time - exif_time
@@ -140,6 +147,11 @@ class GeotagFromGPX(GeotagFromGeneric):
                 continue
 
             interpolated = interpolate_lat_lon(sorted_points, exif_time)
+            
+            # my hackery - resulting interpolated point
+            idx = interpolate_idx(sorted_points, exif_time)
+            LOG.debug(f"GPX interpolated point lat, lon: {round(interpolated.lat, 6)}, {round(interpolated.lon, 6)} ({idx} / {len(sorted_points)}) @ {exif_time}")
+            
             point = types.GPXPointAngle(
                 point=types.GPXPoint(
                     time=exif_time,
