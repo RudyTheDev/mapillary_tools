@@ -1,0 +1,310 @@
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'GH020137.MP4':
+  Metadata:
+    major_brand     : mp41
+    minor_version   : 538120216
+    compatible_brands: mp41
+    creation_time   : 2022-05-31T17:49:29.000000Z
+    firmware        : HD8.01.02.50.00
+  Duration: 00:08:51.54, start: 0.000000, bitrate: 60274 kb/s
+  Stream #0:0[0x1](eng): Video: h264 (High) (avc1 / 0x31637661), yuvj420p(pc, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 59999 kb/s, 59.94 fps, 59.94 tbr, 60k tbn (default)
+    Metadata:
+      creation_time   : 2022-05-31T17:49:29.000000Z
+      handler_name    : GoPro AVC
+      vendor_id       : [0][0][0][0]
+      encoder         : GoPro AVC encoder
+      timecode        : 17:57:16:16
+    Side data:
+      displaymatrix: rotation of -180.00 degrees
+  Stream #0:1[0x2](eng): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 189 kb/s (default)
+    Metadata:
+      creation_time   : 2022-05-31T17:49:29.000000Z
+      handler_name    : GoPro AAC
+      vendor_id       : [0][0][0][0]
+      timecode        : 17:57:16:16
+  Stream #0:2[0x3](eng): Data: none (tmcd / 0x64636D74) (default)
+    Metadata:
+      creation_time   : 2022-05-31T17:49:29.000000Z
+      handler_name    : GoPro TCD
+      timecode        : 17:57:16:16
+  Stream #0:3[0x4](eng): Data: bin_data (gpmd / 0x646D7067), 58 kb/s (default)
+    Metadata:
+      creation_time   : 2022-05-31T17:49:29.000000Z
+      handler_name    : GoPro MET
+  Stream #0:4[0x5](eng): Data: none (fdsc / 0x63736466), 13 kb/s (default)
+    Metadata:
+      creation_time   : 2022-05-31T17:49:29.000000Z
+      handler_name    : GoPro SOS
+Unsupported codec with id 0 for input stream 2
+Unsupported codec with id 98314 for input stream 3
+Unsupported codec with id 0 for input stream 4
+    "streams": [
+        {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "avc1",
+            "codec_tag": "0x31637661",
+            "width": 1920,
+            "height": 1080,
+            "coded_width": 1920,
+            "coded_height": 1080,
+            "closed_captions": 0,
+            "film_grain": 0,
+            "has_b_frames": 0,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "16:9",
+            "pix_fmt": "yuvj420p",
+            "level": 42,
+            "color_range": "pc",
+            "color_space": "bt709",
+            "color_transfer": "bt709",
+            "color_primaries": "bt709",
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "refs": 1,
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "id": "0x1",
+            "r_frame_rate": "60000/1001",
+            "avg_frame_rate": "60000/1001",
+            "time_base": "1/60000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 31891860,
+            "duration": "531.531000",
+            "bit_rate": "59999468",
+            "bits_per_raw_sample": "8",
+            "nb_frames": "31860",
+            "extradata_size": 65,
+            "disposition": {
+                "default": 1,
+                "dub": 0,
+                "original": 0,
+                "comment": 0,
+                "lyrics": 0,
+                "karaoke": 0,
+                "forced": 0,
+                "hearing_impaired": 0,
+                "visual_impaired": 0,
+                "clean_effects": 0,
+                "attached_pic": 0,
+                "timed_thumbnails": 0,
+                "captions": 0,
+                "descriptions": 0,
+                "metadata": 0,
+                "dependent": 0,
+                "still_image": 0
+            },
+            "tags": {
+                "creation_time": "2022-05-31T17:49:29.000000Z",
+                "language": "eng",
+                "handler_name": "\u000bGoPro AVC  ",
+                "vendor_id": "[0][0][0][0]",
+                "encoder": "GoPro AVC encoder",
+                "timecode": "17:57:16:16"
+            },
+            "side_data_list": [
+                {
+                    "side_data_type": "Display Matrix",
+                    "displaymatrix": "\n00000000:       -65536           0           0\n00000001:            0      -65536           0\n00000002:         1920        1080  1073741824\n",
+                    "rotation": -180
+                }
+            ]
+        },
+        {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_long_name": "AAC (Advanced Audio Coding)",
+            "profile": "LC",
+            "codec_type": "audio",
+            "codec_tag_string": "mp4a",
+            "codec_tag": "0x6134706d",
+            "sample_fmt": "fltp",
+            "sample_rate": "48000",
+            "channels": 2,
+            "channel_layout": "stereo",
+            "bits_per_sample": 0,
+            "id": "0x2",
+            "r_frame_rate": "0/0",
+            "avg_frame_rate": "0/0",
+            "time_base": "1/48000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 25513984,
+            "duration": "531.541333",
+            "bit_rate": "189364",
+            "nb_frames": "24916",
+            "extradata_size": 5,
+            "disposition": {
+                "default": 1,
+                "dub": 0,
+                "original": 0,
+                "comment": 0,
+                "lyrics": 0,
+                "karaoke": 0,
+                "forced": 0,
+                "hearing_impaired": 0,
+                "visual_impaired": 0,
+                "clean_effects": 0,
+                "attached_pic": 0,
+                "timed_thumbnails": 0,
+                "captions": 0,
+                "descriptions": 0,
+                "metadata": 0,
+                "dependent": 0,
+                "still_image": 0
+            },
+            "tags": {
+                "creation_time": "2022-05-31T17:49:29.000000Z",
+                "language": "eng",
+                "handler_name": "\u000bGoPro AAC  ",
+                "vendor_id": "[0][0][0][0]",
+                "timecode": "17:57:16:16"
+            }
+        },
+        {
+            "index": 2,
+            "codec_type": "data",
+            "codec_tag_string": "tmcd",
+            "codec_tag": "0x64636d74",
+            "id": "0x3",
+            "r_frame_rate": "0/0",
+            "avg_frame_rate": "60000/1001",
+            "time_base": "1/60000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 31891860,
+            "duration": "531.531000",
+            "nb_frames": "1",
+            "extradata_size": 18,
+            "disposition": {
+                "default": 1,
+                "dub": 0,
+                "original": 0,
+                "comment": 0,
+                "lyrics": 0,
+                "karaoke": 0,
+                "forced": 0,
+                "hearing_impaired": 0,
+                "visual_impaired": 0,
+                "clean_effects": 0,
+                "attached_pic": 0,
+                "timed_thumbnails": 0,
+                "captions": 0,
+                "descriptions": 0,
+                "metadata": 0,
+                "dependent": 0,
+                "still_image": 0
+            },
+            "tags": {
+                "creation_time": "2022-05-31T17:49:29.000000Z",
+                "language": "eng",
+                "handler_name": "\u000bGoPro TCD  ",
+                "timecode": "17:57:16:16"
+            }
+        },
+        {
+            "index": 3,
+            "codec_name": "bin_data",
+            "codec_long_name": "binary data",
+            "codec_type": "data",
+            "codec_tag_string": "gpmd",
+            "codec_tag": "0x646d7067",
+            "id": "0x4",
+            "r_frame_rate": "0/0",
+            "avg_frame_rate": "0/0",
+            "time_base": "1/1000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 531541,
+            "duration": "531.541000",
+            "bit_rate": "58724",
+            "nb_frames": "531",
+            "disposition": {
+                "default": 1,
+                "dub": 0,
+                "original": 0,
+                "comment": 0,
+                "lyrics": 0,
+                "karaoke": 0,
+                "forced": 0,
+                "hearing_impaired": 0,
+                "visual_impaired": 0,
+                "clean_effects": 0,
+                "attached_pic": 0,
+                "timed_thumbnails": 0,
+                "captions": 0,
+                "descriptions": 0,
+                "metadata": 0,
+                "dependent": 0,
+                "still_image": 0
+            },
+            "tags": {
+                "creation_time": "2022-05-31T17:49:29.000000Z",
+                "language": "eng",
+                "handler_name": "\u000bGoPro MET  "
+            }
+        },
+        {
+            "index": 4,
+            "codec_type": "data",
+            "codec_tag_string": "fdsc",
+            "codec_tag": "0x63736466",
+            "id": "0x5",
+            "r_frame_rate": "0/0",
+            "avg_frame_rate": "0/0",
+            "time_base": "1/60000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 31891860,
+            "duration": "531.531000",
+            "bit_rate": "13811",
+            "nb_frames": "57309",
+            "disposition": {
+                "default": 1,
+                "dub": 0,
+                "original": 0,
+                "comment": 0,
+                "lyrics": 0,
+                "karaoke": 0,
+                "forced": 0,
+                "hearing_impaired": 0,
+                "visual_impaired": 0,
+                "clean_effects": 0,
+                "attached_pic": 0,
+                "timed_thumbnails": 0,
+                "captions": 0,
+                "descriptions": 0,
+                "metadata": 0,
+                "dependent": 0,
+                "still_image": 0
+            },
+            "tags": {
+                "creation_time": "2022-05-31T17:49:29.000000Z",
+                "language": "eng",
+                "handler_name": "\u000bGoPro SOS  "
+            }
+        }
+    ],
+    "format": {
+        "filename": "GH020137.MP4",
+        "nb_streams": 5,
+        "nb_programs": 0,
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "format_long_name": "QuickTime / MOV",
+        "start_time": "0.000000",
+        "duration": "531.541333",
+        "size": "4004796511",
+        "bit_rate": "60274469",
+        "probe_score": 100,
+        "tags": {
+            "major_brand": "mp41",
+            "minor_version": "538120216",
+            "compatible_brands": "mp41",
+            "creation_time": "2022-05-31T17:49:29.000000Z",
+            "firmware": "HD8.01.02.50.00"
+        }
+    }
+}
