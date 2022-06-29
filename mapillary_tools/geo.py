@@ -144,13 +144,13 @@ class Point(NamedTuple):
     angle: Optional[float]
 
 
-def interpolate_lat_lon(points: List[Point], timestamp: datetime.datetime) -> Point:
+def interpolate_lat_lon(points: List[Point], t: datetime.datetime) -> Point:
     if not points:
         raise ValueError("Expect non-empty points")
     # Make sure that points are sorted:
     # for cur, nex in pairwise(points):
     #     assert cur.time <= nex.time, "Points not sorted"
-    idx = bisect.bisect_left([x.time for x in points], timestamp)
+    idx = bisect.bisect_left([x.time for x in points], t)
 
     # interpolated within the range
     if 0 < idx < len(points):
@@ -173,7 +173,7 @@ def interpolate_lat_lon(points: List[Point], timestamp: datetime.datetime) -> Po
     if before.time == after.time:
         weight = 0.0
     else:
-        weight = (timestamp - before.time).total_seconds() / (
+        weight = (t - before.time).total_seconds() / (
             after.time - before.time
         ).total_seconds()
     lat = before.lat + (after.lat - before.lat) * weight
@@ -183,15 +183,4 @@ def interpolate_lat_lon(points: List[Point], timestamp: datetime.datetime) -> Po
         alt: Optional[float] = before.alt + (after.alt - before.alt) * weight
     else:
         alt = None
-    return Point(lat=lat, lon=lon, alt=alt, angle=angle, time=timestamp)
-
-
-# my hackery - a copy of interpolate_lat_lon but only the raw index for debug
-def interpolate_idx(points: List[Point], timestamp: datetime.datetime) -> int:
-    if not points:
-        raise ValueError("Expect non-empty points")
-    # Make sure that points are sorted:
-    # for cur, nex in pairwise(points):
-    #     assert cur.time <= nex.time, "Points not sorted"
-    idx = bisect.bisect_left([x.time for x in points], timestamp)
-    return idx
+    return Point(lat=lat, lon=lon, alt=alt, angle=angle, time=t)

@@ -109,35 +109,11 @@ def extract_and_parse_bin(path: str) -> T.List:
     if stream_id is None:
         raise IOError("No GoPro metadata track found - was GPS turned on?")
 
-
-
-
-
-#    with tempfile.NamedTemporaryFile() as tmp:
-#        LOG.debug("Extracting GoPro stream %s to %s", stream_id, tmp.name)
-#        ffmpeg.extract_stream(path, tmp.name, stream_id)
-#        LOG.debug("Parsing GoPro GPMF %s", tmp.name)
-#        return parse_bin(tmp.name)
-        
-# per https://github.com/mapillary/mapillary_tools/issues/503:
-        
-    tmp = tempfile.NamedTemporaryFile(delete = False)
-    try:
+    with tempfile.NamedTemporaryFile() as tmp:
         LOG.debug("Extracting GoPro stream %s to %s", stream_id, tmp.name)
-
-        tmp.close() # Let's close the file to let subprocess access it
         ffmpeg.extract_stream(path, tmp.name, stream_id)
-
         LOG.debug("Parsing GoPro GPMF %s", tmp.name)
-        r = parse_bin(tmp.name)
-    finally:
-        os.remove(tmp.name)
-        return r       
-    
-        
-        
-        
-        
+        return parse_bin(tmp.name)
 
 
 def get_points_from_gpmf(path: str) -> T.List[types.GPXPoint]:
