@@ -1,24 +1,25 @@
+import collections
+import datetime
+import json
 import logging
 import os
 import typing as T
-import json
-import datetime
-import collections
 
 import jsonschema
 import piexif
 from tqdm import tqdm
 
-from . import types, exceptions, uploader, utils, constants
+from . import constants, exceptions, types, uploader, utils
 from .exif_write import ExifEdit
 from .geo import normalize_bearing
 from .geotag import (
-    geotag_from_exif,
-    geotag_from_gopro,
-    geotag_from_nmea_file,
     geotag_from_blackvue,
-    geotag_from_gpx_file,
+    geotag_from_camm,
+    geotag_from_exif,
     geotag_from_generic,
+    geotag_from_gopro,
+    geotag_from_gpx_file,
+    geotag_from_nmea_file,
 )
 
 
@@ -132,7 +133,6 @@ def process_geotag_properties(
         geotag = geotag_from_gopro.GeotagFromGoPro(
             import_path,
             geotag_source_path,
-            use_gpx_start_time=interpolation_use_gpx_start_time,
             offset_time=interpolation_offset_time,
         )
     elif geotag_source == "blackvue_videos":
@@ -152,14 +152,26 @@ def process_geotag_properties(
             use_gpx_start_time=interpolation_use_gpx_start_time,
             offset_time=interpolation_offset_time,
         )
+    elif geotag_source == "camm":
+        if geotag_source_path is None:
+            geotag_source_path = video_import_path
+        if geotag_source_path is None:
+            raise exceptions.MapillaryFileNotFoundError(
+                "Geotag source path is required"
+            )
+        if not os.path.exists(geotag_source_path):
+            raise exceptions.MapillaryFileNotFoundError(
+                f"CAMM video file or directory not found: {geotag_source_path}"
+            )
+        geotag = geotag_from_camm.GeotagFromCAMM(
+            import_path,
+            geotag_source_path,
+            offset_time=interpolation_offset_time,
+        )
     else:
         raise RuntimeError(f"Invalid geotag source {geotag_source}")
 
-    descs = geotag.to_description()
-
-    descs = list(types.map_descs(validate_and_fail_desc, descs))
-
-    return descs
+    return list(types.map_descs(validate_and_fail_desc, geotag.to_description()))
 
 
 def overwrite_exif_tags(
@@ -204,7 +216,9 @@ def verify_exif_write(
     image_path = os.path.join(import_path, desc["filename"])
     with open(image_path, "rb") as fp:
         edit = ExifEdit(fp.read())
-    edit.add_image_description(uploader.desc_file_to_exif(desc))
+    # The cast is to fix the type error in Python3.6:
+    # Argument 1 to "add_image_description" of "ExifEdit" has incompatible type "ImageDescriptionEXIF"; expected "Dict[str, Any]"
+    edit.add_image_description(T.cast(T.Dict, uploader.desc_file_to_exif(desc)))
     try:
         edit.dump_image_bytes()
     except piexif.InvalidImageDataError as exc:

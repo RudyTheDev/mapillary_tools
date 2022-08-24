@@ -3,11 +3,13 @@ import sys
 import typing as T
 
 if sys.version_info >= (3, 8):
-    from typing import TypedDict, Literal  # pylint: disable=no-name-in-module
+    from typing import Literal, TypedDict  # pylint: disable=no-name-in-module
 else:
-    from typing_extensions import TypedDict, Literal
+    from typing_extensions import Literal, TypedDict
 
 import jsonschema
+
+from . import geo
 
 
 class UserItem(TypedDict, total=False):
@@ -226,44 +228,32 @@ def filter_out_errors(
     )
 
 
-def datetime_to_map_capture_time(time: datetime.datetime) -> str:
-    return datetime.datetime.strftime(time, "%Y_%m_%d_%H_%M_%S_%f")[:-3]
+def datetime_to_map_capture_time(time: T.Union[datetime.datetime, int, float]) -> str:
+    if isinstance(time, (float, int)):
+        dt = datetime.datetime.utcfromtimestamp(time)
+    else:
+        dt = time
+    return datetime.datetime.strftime(dt, "%Y_%m_%d_%H_%M_%S_%f")[:-3]
 
 
 def map_capture_time_to_datetime(time: str) -> datetime.datetime:
     return datetime.datetime.strptime(time, "%Y_%m_%d_%H_%M_%S_%f")
 
 
-class GPXPoint(T.NamedTuple):
-    # Put it first for sorting
-    time: datetime.datetime
-    lat: float
-    lon: float
-    alt: T.Optional[float]
-
-    def as_desc(self) -> Image:
-        desc: Image = {
-            "MAPLatitude": self.lat,
-            "MAPLongitude": self.lon,
-            "MAPCaptureTime": datetime_to_map_capture_time(self.time),
+def as_desc(point: geo.Point) -> Image:
+    desc: Image = {
+        "MAPLatitude": point.lat,
+        "MAPLongitude": point.lon,
+        "MAPCaptureTime": datetime_to_map_capture_time(point.time),
+    }
+    if point.alt is not None:
+        desc["MAPAltitude"] = point.alt
+    if point.angle is not None:
+        desc["MAPCompassHeading"] = {
+            "TrueHeading": point.angle,
+            "MagneticHeading": point.angle,
         }
-        if self.alt is not None:
-            desc["MAPAltitude"] = self.alt
-        return desc
-
-
-class GPXPointAngle(T.NamedTuple):
-    point: GPXPoint
-    angle: T.Optional[float]
-
-    def as_desc(self) -> Image:
-        desc = self.point.as_desc()
-        if self.angle is not None:
-            desc["MAPCompassHeading"] = {
-                "TrueHeading": self.angle,
-                "MagneticHeading": self.angle,
-            }
-        return desc
+    return desc
 
 
 if __name__ == "__main__":

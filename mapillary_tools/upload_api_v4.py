@@ -1,8 +1,9 @@
-import requests
-import os
 import io
+import os
 import sys
 import typing as T
+
+import requests
 
 if sys.version_info >= (3, 8):
     from typing import Literal  # pylint: disable=no-name-in-module
@@ -145,7 +146,7 @@ class UploadService:
                 f"Upload server error: File handle not found in the upload response {resp.text}"
             )
 
-    def finish(self, file_handle: str) -> int:
+    def finish(self, file_handle: str) -> str:
         headers = {
             "Authorization": f"OAuth {self.user_access_token}",
         }
@@ -173,7 +174,7 @@ class UploadService:
                 f"Upload server error: failed to create the cluster {resp.text}"
             )
 
-        return T.cast(int, cluster_id)
+        return T.cast(str, cluster_id)
 
 
 import random
@@ -219,8 +220,8 @@ class FakeUploadService(UploadService):
                     callback(chunk, None)
         return self.session_key
 
-    def finish(self, _: str) -> int:
-        return 0
+    def finish(self, _: str) -> str:
+        return "0"
 
     def fetch_offset(self) -> int:
         if random.random() <= self._error_ratio:
@@ -247,7 +248,8 @@ def _file_stats(fp: T.IO[bytes]):
 
 
 if __name__ == "__main__":
-    import sys, hashlib, os
+    import hashlib, os, sys
+
     import tqdm
 
     user_access_token = os.getenv("MAPILLARY_TOOLS_USER_ACCESS_TOKEN")

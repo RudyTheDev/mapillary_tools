@@ -1,12 +1,13 @@
+import hashlib
 import json
 import os
 import subprocess
 import zipfile
-import hashlib
+
+import exifread
+import py.path
 
 import pytest
-import py.path
-import exifread
 
 EXECUTABLE = os.getenv(
     "MAPILLARY_TOOLS_EXECUTABLE", "python3 -m mapillary_tools.commands"
@@ -27,6 +28,7 @@ def setup_config(tmpdir: py.path.local):
     yield config_path
     if tmpdir.check():
         tmpdir.remove(ignore_errors=True)
+    del os.environ["MAPILLARY_CONFIG_PATH"]
 
 
 @pytest.fixture
@@ -37,6 +39,18 @@ def setup_data(tmpdir: py.path.local):
     yield data_path
     if tmpdir.check():
         tmpdir.remove(ignore_errors=True)
+
+
+@pytest.fixture
+def setup_upload(tmpdir: py.path.local):
+    upload_dir = tmpdir.mkdir("mapillary_public_uploads")
+    os.environ["MAPILLARY_UPLOAD_PATH"] = str(upload_dir)
+    os.environ["MAPILLARY__DISABLE_BLACKVUE_CHECK"] = "YES"
+    yield upload_dir
+    if tmpdir.check():
+        tmpdir.remove(ignore_errors=True)
+    del os.environ["MAPILLARY_UPLOAD_PATH"]
+    del os.environ["MAPILLARY__DISABLE_BLACKVUE_CHECK"]
 
 
 def test_basic():
@@ -103,11 +117,11 @@ def test_zip(tmpdir: py.path.local, setup_data: py.path.local):
 
 
 def test_upload_image_dir(
-    tmpdir: py.path.local, setup_config: py.path.local, setup_data: py.path.local
+    tmpdir: py.path.local,
+    setup_config: py.path.local,
+    setup_data: py.path.local,
+    setup_upload: py.path.local,
 ):
-    os.environ["MAPILLARY_CONFIG_PATH"] = str(setup_config)
-    upload_dir = tmpdir.mkdir("mapillary_public_uploads")
-    os.environ["MAPILLARY_UPLOAD_PATH"] = str(upload_dir)
     x = subprocess.run(
         f"{EXECUTABLE} process {setup_data}",
         shell=True,
@@ -117,17 +131,17 @@ def test_upload_image_dir(
         f"{EXECUTABLE} upload {setup_data} --dry_run --user_name={USERNAME}",
         shell=True,
     )
-    for file in upload_dir.listdir():
+    for file in setup_upload.listdir():
         validate_and_extract_zip(str(file))
     assert x.returncode == 0, x.stderr
 
 
 def test_upload_image_dir_twice(
-    tmpdir: py.path.local, setup_config: py.path.local, setup_data: py.path.local
+    tmpdir: py.path.local,
+    setup_config: py.path.local,
+    setup_data: py.path.local,
+    setup_upload: py.path.local,
 ):
-    os.environ["MAPILLARY_CONFIG_PATH"] = str(setup_config)
-    upload_dir = tmpdir.mkdir("mapillary_public_uploads")
-    os.environ["MAPILLARY_UPLOAD_PATH"] = str(upload_dir)
     x = subprocess.run(
         f"{EXECUTABLE} process {setup_data}",
         shell=True,
@@ -142,7 +156,7 @@ def test_upload_image_dir_twice(
         shell=True,
     )
     assert x.returncode == 0, x.stderr
-    for file in upload_dir.listdir():
+    for file in setup_upload.listdir():
         validate_and_extract_zip(str(file))
         md5sum_map[os.path.basename(file)] = file_md5sum(file)
 
@@ -152,19 +166,19 @@ def test_upload_image_dir_twice(
         shell=True,
     )
     assert x.returncode == 0, x.stderr
-    for file in upload_dir.listdir():
+    for file in setup_upload.listdir():
         validate_and_extract_zip(str(file))
         new_md5sum = file_md5sum(file)
         assert md5sum_map[os.path.basename(file)] == new_md5sum
-    assert len(md5sum_map) == len(upload_dir.listdir())
+    assert len(md5sum_map) == len(setup_upload.listdir())
 
 
 def test_upload_zip(
-    tmpdir: py.path.local, setup_data: py.path.local, setup_config: py.path.local
+    tmpdir: py.path.local,
+    setup_data: py.path.local,
+    setup_config: py.path.local,
+    setup_upload: py.path.local,
 ):
-    os.environ["MAPILLARY_CONFIG_PATH"] = str(setup_config)
-    upload_dir = tmpdir.mkdir("mapillary_public_uploads")
-    os.environ["MAPILLARY_UPLOAD_PATH"] = str(upload_dir)
     zip_dir = tmpdir.mkdir("zip_dir")
     x = subprocess.run(
         f"{EXECUTABLE} process {setup_data}",
@@ -182,22 +196,22 @@ def test_upload_zip(
             shell=True,
         )
         assert x.returncode == 0, x.stderr
-    for file in upload_dir.listdir():
+    for file in setup_upload.listdir():
         validate_and_extract_zip(str(file))
 
 
 def test_process_and_upload(
-    tmpdir: py.path.local, setup_config: py.path.local, setup_data: py.path.local
+    tmpdir: py.path.local,
+    setup_config: py.path.local,
+    setup_data: py.path.local,
+    setup_upload: py.path.local,
 ):
-    os.environ["MAPILLARY_CONFIG_PATH"] = str(setup_config)
-    upload_dir = tmpdir.mkdir("mapillary_public_uploads")
-    os.environ["MAPILLARY_UPLOAD_PATH"] = str(upload_dir)
     x = subprocess.run(
         f"{EXECUTABLE} process_and_upload {setup_data} --dry_run --user_name={USERNAME}",
         shell=True,
     )
     assert x.returncode == 0, x.stderr
-    for file in upload_dir.listdir():
+    for file in setup_upload.listdir():
         validate_and_extract_zip(str(file))
 
 
@@ -323,7 +337,6 @@ def test_angle(setup_data: py.path.local):
 def test_process_boolean_options(
     setup_config: py.path.local, setup_data: py.path.local
 ):
-    os.environ["MAPILLARY_CONFIG_PATH"] = str(setup_config)
     boolean_options = [
         "--add_file_name",
         "--add_import_date",
@@ -569,29 +582,32 @@ def test_sample_video(setup_data: py.path.local):
     if not is_ffmpeg_installed:
         pytest.skip("skip because ffmpeg not installed")
 
+    root_sample_dir = setup_data.join("mapillary_sampled_video_frames")
+
     for input_path in [setup_data, setup_data.join("sample-5s.mp4")]:
         x = subprocess.run(
             f"{EXECUTABLE} sample_video --rerun {input_path}",
             shell=True,
         )
         assert x.returncode != 0, x.stderr
-        assert len(setup_data.join("mapillary_sampled_video_frames").listdir()) == 0
+        if root_sample_dir.exists():
+            assert len(root_sample_dir.listdir()) == 0
 
         x = subprocess.run(
             f"{EXECUTABLE} sample_video --skip_sample_errors --rerun {input_path}",
             shell=True,
         )
         assert x.returncode == 0, x.stderr
-        assert len(setup_data.join("mapillary_sampled_video_frames").listdir()) == 0
+        if root_sample_dir.exists():
+            assert len(root_sample_dir.listdir()) == 0
 
         x = subprocess.run(
             f"{EXECUTABLE} sample_video --video_start_time 2021_10_10_10_10_10_123 --rerun {input_path}",
             shell=True,
         )
         assert x.returncode == 0, x.stderr
-        sample_path = setup_data.join("mapillary_sampled_video_frames")
-        assert len(sample_path.listdir()) == 1
-        samples = sample_path.join("sample-5s.mp4").listdir()
+        assert len(root_sample_dir.listdir()) == 1
+        samples = root_sample_dir.join("sample-5s.mp4").listdir()
         samples.sort()
         times = []
         for s in samples:
@@ -660,34 +676,31 @@ def file_md5sum(path) -> str:
 
 
 def test_upload_multiple_mp4s_DEPRECATED(
-    tmpdir: py.path.local, setup_data: py.path.local, setup_config: py.path.local
+    tmpdir: py.path.local,
+    setup_data: py.path.local,
+    setup_config: py.path.local,
+    setup_upload: py.path.local,
 ):
-    os.environ["MAPILLARY_CONFIG_PATH"] = str(setup_config)
-    os.environ["MAPILLARY__DISABLE_BLACKVUE_CHECK"] = "YES"
-    upload_dir = tmpdir.mkdir("mapillary_public_uploads")
-    os.environ["MAPILLARY_UPLOAD_PATH"] = str(upload_dir)
     video_path = setup_data.join("sample-5s.mp4")
     x = subprocess.run(
         f"{EXECUTABLE} upload {video_path} {video_path} --dry_run --user_name={USERNAME}",
         shell=True,
     )
 
-    assert 1 == len(upload_dir.listdir())
+    assert 1 == len(setup_upload.listdir())
     assert {"mly_tools_8cd0e9af15f4baaafe9dfe98ace8b886.mp4"} == {
-        os.path.basename(f) for f in upload_dir.listdir()
+        os.path.basename(f) for f in setup_upload.listdir()
     }
     md5sum = file_md5sum(video_path)
-    assert {md5sum} == {file_md5sum(f) for f in upload_dir.listdir()}
+    assert {md5sum} == {file_md5sum(f) for f in setup_upload.listdir()}
 
 
 def test_upload_blackvue(
-    tmpdir: py.path.local, setup_data: py.path.local, setup_config: py.path.local
+    tmpdir: py.path.local,
+    setup_data: py.path.local,
+    setup_config: py.path.local,
+    setup_upload: py.path.local,
 ):
-    os.environ["MAPILLARY_CONFIG_PATH"] = str(setup_config)
-    os.environ["MAPILLARY__DISABLE_BLACKVUE_CHECK"] = "YES"
-    upload_dir = tmpdir.mkdir("mapillary_public_uploads")
-    os.environ["MAPILLARY_UPLOAD_PATH"] = str(upload_dir)
-
     another_path = tmpdir.join("another_sub")
 
     video_path2 = another_path.join("sub1 folder").join("sub2 folder").join("hello.mp4")
@@ -710,9 +723,9 @@ def test_upload_blackvue(
     )
     assert x.returncode == 0, x.stderr
 
-    assert 3 == len(upload_dir.listdir())
+    assert 3 == len(setup_upload.listdir())
     assert {
         "mly_tools_8cd0e9af15f4baaafe9dfe98ace8b886.mp4",
         f"mly_tools_{file_md5sum(str(video_path2))}.mp4",
         f"mly_tools_{file_md5sum(str(video_path_hello2))}.mp4",
-    } == {os.path.basename(f) for f in upload_dir.listdir()}
+    } == {os.path.basename(f) for f in setup_upload.listdir()}

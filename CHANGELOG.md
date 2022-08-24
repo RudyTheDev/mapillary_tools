@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.9.0](https://github.com/mapillary/mapillary_tools/compare/v0.8.2...v0.9.0) (2022-07-23)
+
+
+### Features
+
+* Enable upload history and duplication check ([#497](https://github.com/mapillary/mapillary_tools/issues/497)) ([ee40cfa](https://github.com/mapillary/mapillary_tools/commit/ee40cfa96e5deb5577e5bbc82eb9baa584bf8932))
+* [experimental] Add CAMM camera support https://github.com/mapillary/mapillary_tools/pull/515
+
+### Improvement
+
+* Clarify a few command line options in the help page (--help) https://github.com/mapillary/mapillary_tools/pull/509
+* Remove pymp4 https://github.com/mapillary/mapillary_tools/pull/506
+
+### Bug Fixes
+
+* subprocess processing temporary file in Windows ([#510](https://github.com/mapillary/mapillary_tools/issues/510)) ([2902606](https://github.com/mapillary/mapillary_tools/commit/2902606ec8bbf3309761dd9dd9efaaf55a2d423b))
+* upload blackvue in subfolders ([#501](https://github.com/mapillary/mapillary_tools/issues/501)) ([4bfebf8](https://github.com/mapillary/mapillary_tools/commit/4bfebf8705d06d8568619cc0c6b83fd3d4fad95e))
+
 ### [0.8.2](https://github.com/mapillary/mapillary_tools/compare/v0.8.1...v0.8.2) (2022-02-11)
 
 

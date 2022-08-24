@@ -4,15 +4,15 @@ import typing as T
 
 from tqdm import tqdm
 
-from .. import utils, types
+from .. import geo, types, utils
 from ..exceptions import (
-    MapillaryStationaryVideoError,
     MapillaryInvalidBlackVueVideoError,
+    MapillaryStationaryVideoError,
 )
 from ..geo import get_max_distance_from_start
+from . import blackvue_utils, utils as geotag_utils
 from .geotag_from_generic import GeotagFromGeneric
 from .geotag_from_gpx import GeotagFromGPXWithProgress
-from . import utils as geotag_utils, blackvue_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -95,7 +95,7 @@ class GeotagFromBlackVue(GeotagFromGeneric):
                 geotag = GeotagFromGPXWithProgress(
                     self.image_dir,
                     sample_images,
-                    T.cast(T.List[types.GPXPoint], points),
+                    points,
                     use_gpx_start_time=self.use_gpx_start_time,
                     offset_time=self.offset_time,
                     progress_bar=pbar,
